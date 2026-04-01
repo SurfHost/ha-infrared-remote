@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Infrared Remote",
+        "description": "Select an infrared emitter and device type.",
+        "data": {
+          "infrared_entity_id": "Infrared Emitter",
+          "device_type": "Device Type",
+          "device_name": "Device Name (optional, e.g. 'Woonkamer TV')"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This configuration already exists.",
+      "no_emitters": "No infrared emitter entities found. Set up an IR emitter first (e.g., Broadlink Infrared Emitter)."
+    }
+  }
+}

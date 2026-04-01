@@ -1,0 +1,11 @@
+{
+  "domain": "infrared_remote",
+  "name": "Infrared Remote",
+  "version": "0.2.0",
+  "documentation": "https://github.com/your-repo/ha-infrared-remote",
+  "dependencies": ["infrared"],
+  "codeowners": [],
+  "config_flow": true,
+  "iot_class": "local_push",
+  "integration_type": "device"
+}
