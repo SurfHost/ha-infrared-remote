@@ -21,12 +21,10 @@ from .const import (
     DEVICE_TYPE_SAMSUNG_TV,
     DEVICE_TYPES,
     DOMAIN,
-    LG_TV_ADDRESS,
     LG_TV_COMMANDS,
-    SAMSUNG_TV_ADDRESS,
     SAMSUNG_TV_COMMANDS,
 )
-from .nec import NECCommand, RawTestCommand
+from .ir_commands import make_lg_command, make_raw_test_command, make_samsung_command
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,34 +68,30 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Infrared Remote",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.2.0",
+        sw_version="0.3.0",
     )
 
     entities: list[ButtonEntity] = []
 
     if device_type == DEVICE_TYPE_NEC_TV:
-        for cmd_name, cmd_code in LG_TV_COMMANDS.items():
+        for cmd_name in LG_TV_COMMANDS:
             entities.append(
                 IRButton(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
-                    command_factory=lambda code=cmd_code: NECCommand(
-                        address=LG_TV_ADDRESS, command=code
-                    ),
+                    command_factory=lambda name=cmd_name: make_lg_command(name),
                     device_info=device_info,
                 )
             )
     elif device_type == DEVICE_TYPE_SAMSUNG_TV:
-        for cmd_name, cmd_code in SAMSUNG_TV_COMMANDS.items():
+        for cmd_name in SAMSUNG_TV_COMMANDS:
             entities.append(
                 IRButton(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
-                    command_factory=lambda code=cmd_code: NECCommand(
-                        address=SAMSUNG_TV_ADDRESS, command=code
-                    ),
+                    command_factory=lambda name=cmd_name: make_samsung_command(name),
                     device_info=device_info,
                 )
             )
@@ -107,7 +101,7 @@ async def async_setup_entry(
                 config_entry=config_entry,
                 emitter_entity_id=emitter_entity_id,
                 command_name="test_signal",
-                command_factory=lambda: RawTestCommand(),
+                command_factory=make_raw_test_command,
                 device_info=device_info,
             )
         )
@@ -140,6 +134,9 @@ class IRButton(ButtonEntity):
     async def async_press(self) -> None:
         """Send the IR command when the button is pressed."""
         command = self._command_factory()
+        if command is None:
+            _LOGGER.error("Failed to create IR command for '%s'", self._command_name)
+            return
 
         _LOGGER.info(
             "Sending IR command '%s' via emitter %s",

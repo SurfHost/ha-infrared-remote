@@ -24,12 +24,8 @@ from .const import (
     DEVICE_TYPE_SAMSUNG_TV,
     DEVICE_TYPES,
     DOMAIN,
-    LG_TV_ADDRESS,
-    LG_TV_COMMANDS,
-    SAMSUNG_TV_ADDRESS,
-    SAMSUNG_TV_COMMANDS,
 )
-from .nec import NECCommand
+from .ir_commands import make_lg_command, make_samsung_command
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,11 +46,9 @@ async def async_setup_entry(
         return
 
     if device_type == DEVICE_TYPE_NEC_TV:
-        address = LG_TV_ADDRESS
-        commands = LG_TV_COMMANDS
+        command_factory = make_lg_command
     elif device_type == DEVICE_TYPE_SAMSUNG_TV:
-        address = SAMSUNG_TV_ADDRESS
-        commands = SAMSUNG_TV_COMMANDS
+        command_factory = make_samsung_command
     else:
         return
 
@@ -63,7 +57,7 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Infrared Remote",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.2.0",
+        sw_version="0.3.0",
     )
 
     async_add_entities(
@@ -71,8 +65,7 @@ async def async_setup_entry(
             IRMediaPlayer(
                 config_entry=config_entry,
                 emitter_entity_id=emitter_entity_id,
-                address=address,
-                commands=commands,
+                command_factory=command_factory,
                 device_info=device_info,
             )
         ]
@@ -97,14 +90,12 @@ class IRMediaPlayer(MediaPlayerEntity):
         self,
         config_entry: ConfigEntry,
         emitter_entity_id: str,
-        address: int,
-        commands: dict[str, int],
+        command_factory: object,
         device_info: DeviceInfo,
     ) -> None:
         """Initialize the IR media player."""
         self._emitter_entity_id = emitter_entity_id
-        self._address = address
-        self._commands = commands
+        self._command_factory = command_factory
         self._attr_unique_id = f"{config_entry.entry_id}_media_player"
         self._attr_device_info = device_info
         self._attr_state = MediaPlayerState.OFF
@@ -112,19 +103,12 @@ class IRMediaPlayer(MediaPlayerEntity):
 
     async def _send_command(self, command_name: str) -> None:
         """Send an IR command by name."""
-        code = self._commands.get(command_name)
-        if code is None:
-            _LOGGER.warning("Command '%s' not found in command set", command_name)
+        command = self._command_factory(command_name)
+        if command is None:
+            _LOGGER.warning("Command '%s' not available", command_name)
             return
 
-        command = NECCommand(address=self._address, command=code)
-
-        _LOGGER.debug(
-            "Media player sending '%s' (addr=0x%02X, cmd=0x%02X)",
-            command_name,
-            self._address,
-            code,
-        )
+        _LOGGER.debug("Media player sending '%s'", command_name)
 
         await infrared.async_send_command(
             self.hass,
