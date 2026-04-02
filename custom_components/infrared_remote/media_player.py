@@ -12,6 +12,7 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -57,7 +58,7 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Infrared Remote",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.3.0",
+        sw_version="0.3.2",
     )
 
     async_add_entities(
@@ -110,12 +111,21 @@ class IRMediaPlayer(MediaPlayerEntity):
 
         _LOGGER.debug("Media player sending '%s'", command_name)
 
-        await infrared.async_send_command(
-            self.hass,
-            self._emitter_entity_id,
-            command,
-            context=self._context,
-        )
+        try:
+            await infrared.async_send_command(
+                self.hass,
+                self._emitter_entity_id,
+                command,
+                context=self._context,
+            )
+        except HomeAssistantError as err:
+            _LOGGER.error(
+                "Failed to send IR command '%s' via %s: %s",
+                command_name,
+                self._emitter_entity_id,
+                err,
+            )
+            raise
 
     async def async_turn_on(self) -> None:
         """Turn the TV on."""
