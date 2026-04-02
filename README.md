@@ -6,7 +6,7 @@ Custom Home Assistant integration that creates **button** and **media_player** e
 
 ## What does this do?
 
-This is a **consumer integration** for the HA 2026.4 infrared platform. It sends IR commands through any available infrared emitter (like [Broadlink Infrared Emitter](https://github.com/your-repo/ha-broadlink-infrared) or ESPHome IR proxy).
+This is a **consumer integration** for the HA 2026.4 infrared platform. It sends IR commands through any available infrared emitter (like [Broadlink Infrared Emitter](https://github.com/SurfHost/ha-broadlink-infrared) or ESPHome IR proxy).
 
 Set it up, pick your emitter, choose your device type, and you get:
 
