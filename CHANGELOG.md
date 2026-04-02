@@ -5,6 +5,11 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-04-02
+
+### Fixed
+- Added icon URL to hacs.json so HACS displays the integration icon
+
 ## [0.3.2] - 2026-04-02
 
 ### Fixed

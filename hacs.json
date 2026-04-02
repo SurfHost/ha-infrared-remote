@@ -1,5 +1,6 @@
 {
   "name": "Infrared Remote",
   "render_readme": true,
-  "homeassistant": "2026.4.0"
+  "homeassistant": "2026.4.0",
+  "icon": "https://raw.githubusercontent.com/SurfHost/ha-infrared-remote/main/custom_components/infrared_remote/brand/icon.png"
 }
