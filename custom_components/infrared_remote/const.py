@@ -5,6 +5,7 @@ DOMAIN = "infrared_remote"
 CONF_INFRARED_ENTITY_ID = "infrared_entity_id"
 CONF_DEVICE_TYPE = "device_type"
 CONF_DEVICE_NAME = "device_name"
+CONF_ATTACH_TO_DEVICE = "attach_to_device"
 
 DEVICE_TYPE_NEC_TV = "nec_tv"
 DEVICE_TYPE_SAMSUNG_TV = "samsung_tv"

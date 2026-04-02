@@ -10,10 +10,12 @@ from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
+    CONF_ATTACH_TO_DEVICE,
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
     CONF_INFRARED_ENTITY_ID,
@@ -64,13 +66,23 @@ async def async_setup_entry(
         CONF_DEVICE_NAME, DEVICE_TYPES.get(device_type, "IR Remote")
     )
 
-    device_info = DeviceInfo(
-        identifiers={(DOMAIN, config_entry.entry_id)},
-        name=device_name,
-        manufacturer="Infrared Remote",
-        model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.3.3",
-    )
+    attach_device_id = config_entry.data.get(CONF_ATTACH_TO_DEVICE)
+    if attach_device_id:
+        dev_reg = dr.async_get(hass)
+        dev_entry = dev_reg.async_get(attach_device_id)
+        if dev_entry:
+            device_info = DeviceInfo(identifiers=dev_entry.identifiers)
+        else:
+            _LOGGER.error("Target device %s not found", attach_device_id)
+            return
+    else:
+        device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=device_name,
+            manufacturer="Infrared Remote",
+            model=DEVICE_TYPES.get(device_type, device_type),
+            sw_version="0.4.0",
+        )
 
     entities: list[ButtonEntity] = []
 

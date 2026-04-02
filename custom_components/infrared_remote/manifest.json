@@ -1,7 +1,7 @@
 {
   "domain": "infrared_remote",
   "name": "Infrared Remote",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "documentation": "https://github.com/SurfHost/ha-infrared-remote",
   "dependencies": ["infrared"],
   "codeowners": ["@SurfHost"],
