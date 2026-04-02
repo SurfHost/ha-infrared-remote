@@ -17,6 +17,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
+    CONF_ATTACH_TO_DEVICE,
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
     CONF_INFRARED_ENTITY_ID,
@@ -43,6 +44,9 @@ async def async_setup_entry(
         CONF_DEVICE_NAME, DEVICE_TYPES.get(device_type, "IR Remote")
     )
 
+    if config_entry.data.get(CONF_ATTACH_TO_DEVICE):
+        return  # Existing device already has a media player
+
     if device_type == DEVICE_TYPE_RAW_TEST:
         return
 
@@ -58,7 +62,7 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Infrared Remote",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.3.3",
+        sw_version="0.4.0",
     )
 
     async_add_entities(

@@ -5,6 +5,13 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-02
+
+### Added
+- **Attach to existing device** option in config flow — IR button entities merge into an existing device (e.g., your LG WebOS TV) instead of creating a separate device
+- Media player entity is skipped in attach mode (the target device already has one)
+- New config flow with setup mode choice: "Create new device" or "Attach to existing device"
+
 ## [0.3.3] - 2026-04-02
 
 ### Fixed
