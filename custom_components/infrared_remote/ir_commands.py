@@ -23,7 +23,7 @@ except ImportError:
     )
 
 from .nec import NECCommand, RawTestCommand  # noqa: E402
-from .sharp import SharpCommand  # noqa: E402
+from .sharp import DenonCommand, SharpCommand  # noqa: E402
 from .const import (  # noqa: E402
     DENON_AVR_ADDRESS,
     DENON_AVR_COMMANDS,
@@ -91,15 +91,16 @@ def make_sharp_tv_command(command_name: str) -> SharpCommand | None:
     return SharpCommand(address=SHARP_TV_ADDRESS, command=code)
 
 
-def make_denon_avr_command(command_name: str) -> SharpCommand | None:
+def make_denon_avr_command(command_name: str) -> DenonCommand | None:
     """Create an IR command for a Denon AV receiver.
 
-    Uses Sharp/Denon protocol with address 2.
+    Uses Denon protocol with address 2. Denon has different timing
+    from Sharp despite being in the same protocol family.
     """
     code = DENON_AVR_COMMANDS.get(command_name)
     if code is None:
         return None
-    return SharpCommand(address=DENON_AVR_ADDRESS, command=code)
+    return DenonCommand(address=DENON_AVR_ADDRESS, command=code)
 
 
 def make_raw_test_command() -> RawTestCommand:
