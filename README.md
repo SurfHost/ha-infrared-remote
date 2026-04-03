@@ -10,16 +10,22 @@ This is a **consumer integration** for the HA 2026.4 infrared platform. It sends
 
 Set it up, pick your emitter, choose your device type, and you get:
 
-- A **media_player** entity for your TV (power, volume, mute) that works like any smart TV
-- **Button** entities for all remote functions (18 for LG, 15 for Samsung)
+- A **media_player** entity for your TV or receiver (power, volume, mute)
+- **Button** entities for all remote functions
+- Option to **attach IR buttons to an existing device** (like Battery Notes does)
+- **Reconfigure** after setup — see and change the linked emitter
 - Everything works through the new infrared platform with proper HA integration
 
 ## Supported devices
 
 | Device Type | Protocol | Buttons | Media Player |
 |-------------|----------|---------|--------------|
-| LG TV | NEC (addr 0x04) | 18 | Yes |
-| Samsung TV | NEC (addr 0x07) | 15 | Yes |
+| LG TV | NEC (addr 0x04) | 18 | Yes (TV) |
+| Samsung TV | NEC (addr 0x07) | 15 | Yes (TV) |
+| Sharp TV (Aquos) | Sharp (addr 0x01) | 20 | Yes (TV) |
+| Denon AVR Receiver | Denon (addr 0x02) | 16 | Yes (Receiver) |
+| Philips RGBIC Lamp | NEC (addr 0x00) | 11 | No |
+| Amino Kamai 7X STB | RC6 (raw learned) | 8 | No |
 | Raw Test | Raw burst | 1 | No |
 
 ## Requirements
@@ -52,4 +58,4 @@ Set it up, pick your emitter, choose your device type, and you get:
 
 ## Adding more device types
 
-The NEC protocol encoder is built-in. To add more devices, you only need to know the NEC address and command codes. PRs welcome!
+Built-in protocol encoders: **NEC**, **Sharp**, and **Denon**. For unsupported protocols, Broadlink-learned codes can be stored as raw timings. PRs welcome!
