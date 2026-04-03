@@ -123,13 +123,28 @@ SHARP_TV_COMMANDS = {
 # Denon AVR codes (address 2) — Denon AV receivers
 DENON_AVR_ADDRESS = 0x02
 
-# Codes decoded from actual Broadlink-learned Denon AVR-2106 remote
+# Verified codes from actual Broadlink-learned AVR-2106 remote + IRDB
+# Power/volume/mute confirmed by decoding real remote packets.
+# Input/surround codes from IRDB, validated by matching pattern.
 DENON_AVR_COMMANDS = {
+    # Power (confirmed from real remote)
     "power_on": 225,
     "power_off": 226,
+    # Volume (confirmed from real remote)
     "volume_up": 241,
     "volume_down": 242,
     "mute": 240,
-    "input_opt1": 201,
-    "input_opt2": 227,
+    # Input selection (confirmed: tv_dbs=201, dvd=227 from real remote)
+    "input_cd": 66,
+    "input_dvd": 227,
+    "input_tv_dbs": 201,
+    "input_tuner": 197,
+    "input_vcr": 205,
+    "input_v_aux": 204,
+    "input_cdr_tape": 210,
+    # Surround modes (from IRDB)
+    "pure_direct": 106,
+    "stereo": 230,
+    "standard": 228,
+    "multi_channel": 219,
 }

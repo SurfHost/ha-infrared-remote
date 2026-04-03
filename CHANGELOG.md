@@ -5,6 +5,12 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2026-04-03
+
+### Added
+- Denon AVR: expanded from 7 to 15 commands — added input_cd, input_tuner, input_vcr, input_v_aux, input_cdr_tape, pure_direct, standard, multi_channel
+- Renamed input_opt1/opt2 to proper names (input_tv_dbs, input_dvd)
+
 ## [0.5.3] - 2026-04-03
 
 ### Fixed
