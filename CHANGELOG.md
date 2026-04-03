@@ -5,6 +5,13 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-04-03
+
+### Added
+- **Philips RGBIC Ambient Floor Lamp** device type (NEC protocol, address 0x00, 11 commands: on/off, brightness, 6 colors, night mode)
+- **Amino Kamai 7X Set-top Box** device type (RC6 protocol, raw Broadlink-learned codes, 8 commands: power, channel up/down, play/pause/stop, forward/rewind)
+- New `RawBroadlinkCommand` class for devices using protocols too complex to encode (decodes learned Broadlink packets to raw timings)
+
 ## [0.6.0] - 2026-04-03
 
 ### Added
