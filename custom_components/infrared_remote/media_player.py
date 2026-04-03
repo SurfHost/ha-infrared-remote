@@ -21,13 +21,20 @@ from .const import (
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
     CONF_INFRARED_ENTITY_ID,
+    DEVICE_TYPE_DENON_AVR,
     DEVICE_TYPE_NEC_TV,
     DEVICE_TYPE_RAW_TEST,
     DEVICE_TYPE_SAMSUNG_TV,
+    DEVICE_TYPE_SHARP_TV,
     DEVICE_TYPES,
     DOMAIN,
 )
-from .ir_commands import make_lg_command, make_samsung_command
+from .ir_commands import (
+    make_denon_avr_command,
+    make_lg_command,
+    make_samsung_command,
+    make_sharp_tv_command,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,6 +61,10 @@ async def async_setup_entry(
         command_factory = make_lg_command
     elif device_type == DEVICE_TYPE_SAMSUNG_TV:
         command_factory = make_samsung_command
+    elif device_type == DEVICE_TYPE_SHARP_TV:
+        command_factory = make_sharp_tv_command
+    elif device_type == DEVICE_TYPE_DENON_AVR:
+        command_factory = make_denon_avr_command
     else:
         return
 
@@ -62,8 +73,14 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Infrared Remote",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.4.0",
+        sw_version="0.5.0",
     )
+
+    # Denon AVR has discrete power on/off commands
+    power_on_cmd = "power_on" if device_type == DEVICE_TYPE_DENON_AVR else "power"
+    power_off_cmd = "power_off" if device_type == DEVICE_TYPE_DENON_AVR else "power"
+    name = "Receiver" if device_type == DEVICE_TYPE_DENON_AVR else "TV"
+    icon = "mdi:audio-video" if device_type == DEVICE_TYPE_DENON_AVR else "mdi:television"
 
     async_add_entities(
         [
@@ -72,17 +89,19 @@ async def async_setup_entry(
                 emitter_entity_id=emitter_entity_id,
                 command_factory=command_factory,
                 device_info=device_info,
+                power_on_command=power_on_cmd,
+                power_off_command=power_off_cmd,
+                name=name,
+                icon=icon,
             )
         ]
     )
 
 
 class IRMediaPlayer(MediaPlayerEntity):
-    """A media player entity that controls a TV via IR."""
+    """A media player entity that controls a TV or receiver via IR."""
 
     _attr_has_entity_name = True
-    _attr_name = "TV"
-    _attr_icon = "mdi:television"
     _attr_assumed_state = True
     _attr_supported_features = (
         MediaPlayerEntityFeature.TURN_ON
@@ -97,10 +116,18 @@ class IRMediaPlayer(MediaPlayerEntity):
         emitter_entity_id: str,
         command_factory: object,
         device_info: DeviceInfo,
+        power_on_command: str = "power",
+        power_off_command: str = "power",
+        name: str = "TV",
+        icon: str = "mdi:television",
     ) -> None:
         """Initialize the IR media player."""
         self._emitter_entity_id = emitter_entity_id
         self._command_factory = command_factory
+        self._power_on_command = power_on_command
+        self._power_off_command = power_off_command
+        self._attr_name = name
+        self._attr_icon = icon
         self._attr_unique_id = f"{config_entry.entry_id}_media_player"
         self._attr_device_info = device_info
         self._attr_state = MediaPlayerState.OFF
@@ -132,14 +159,14 @@ class IRMediaPlayer(MediaPlayerEntity):
             raise
 
     async def async_turn_on(self) -> None:
-        """Turn the TV on."""
-        await self._send_command("power")
+        """Turn the device on."""
+        await self._send_command(self._power_on_command)
         self._attr_state = MediaPlayerState.ON
         self.async_write_ha_state()
 
     async def async_turn_off(self) -> None:
-        """Turn the TV off."""
-        await self._send_command("power")
+        """Turn the device off."""
+        await self._send_command(self._power_off_command)
         self._attr_state = MediaPlayerState.OFF
         self.async_write_ha_state()
 

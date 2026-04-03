@@ -5,6 +5,15 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-04-03
+
+### Added
+- **Sharp TV (Aquos)** device type with Sharp protocol encoder (address 1, 20 commands)
+- **Denon AVR Receiver** device type with Sharp/Denon protocol encoder (address 2, 12 commands including discrete power on/off and input selection)
+- New `sharp.py` protocol encoder supporting the Sharp/Denon IR protocol family (5-bit address + 8-bit command, two-frame transmission with inversion check)
+- Denon AVR media player entity shows as "Receiver" with discrete power on/off commands
+- Button icons for number keys, Denon inputs (CD, DVD, Tuner, Phono), surround modes
+
 ## [0.4.0] - 2026-04-02
 
 ### Added

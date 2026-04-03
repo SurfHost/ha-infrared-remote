@@ -9,11 +9,15 @@ CONF_ATTACH_TO_DEVICE = "attach_to_device"
 
 DEVICE_TYPE_NEC_TV = "nec_tv"
 DEVICE_TYPE_SAMSUNG_TV = "samsung_tv"
+DEVICE_TYPE_SHARP_TV = "sharp_tv"
+DEVICE_TYPE_DENON_AVR = "denon_avr"
 DEVICE_TYPE_RAW_TEST = "raw_test"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_NEC_TV: "NEC TV (LG, most TVs)",
     DEVICE_TYPE_SAMSUNG_TV: "Samsung TV",
+    DEVICE_TYPE_SHARP_TV: "Sharp TV (Aquos)",
+    DEVICE_TYPE_DENON_AVR: "Denon AVR Receiver",
     DEVICE_TYPE_RAW_TEST: "Raw Test Signal (just a burst)",
 }
 
@@ -72,4 +76,55 @@ SAMSUNG_TV_COMMANDS = {
     "back": 0x58,
     "home": 0x79,
     "menu": 0x1A,
+}
+
+# Sharp/Denon Protocol
+SHARP_FREQUENCY_KHZ = 38
+SHARP_BIT_MARK_US = 320
+SHARP_ONE_SPACE_US = 1680
+SHARP_ZERO_SPACE_US = 680
+SHARP_FRAME_GAP_US = 40000  # 40ms gap between first and second (inverted) frame
+
+# Sharp TV codes (address 1) — Sharp Aquos LC series
+SHARP_TV_ADDRESS = 0x01
+
+SHARP_TV_COMMANDS = {
+    "power": 22,
+    "volume_up": 20,
+    "volume_down": 21,
+    "channel_up": 17,
+    "channel_down": 18,
+    "mute": 23,
+    "input": 19,
+    "menu": 32,
+    "display": 27,
+    "flashback": 47,
+    "0": 10,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+}
+
+# Denon AVR codes (address 2) — Denon AV receivers
+DENON_AVR_ADDRESS = 0x02
+
+DENON_AVR_COMMANDS = {
+    "power": 80,
+    "power_on": 121,
+    "power_off": 226,
+    "volume_up": 76,
+    "volume_down": 77,
+    "mute": 75,
+    "input_cd": 66,
+    "input_dvd": 227,
+    "input_tuner": 67,
+    "input_phono": 65,
+    "pure_direct": 106,
+    "standard": 228,
 }
