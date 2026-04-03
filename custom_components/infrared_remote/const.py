@@ -123,17 +123,13 @@ SHARP_TV_COMMANDS = {
 # Denon AVR codes (address 2) — Denon AV receivers
 DENON_AVR_ADDRESS = 0x02
 
+# Codes decoded from actual Broadlink-learned Denon AVR-2106 remote
 DENON_AVR_COMMANDS = {
-    "power": 80,
-    "power_on": 121,
+    "power_on": 225,
     "power_off": 226,
-    "volume_up": 76,
-    "volume_down": 77,
-    "mute": 75,
-    "input_cd": 66,
-    "input_dvd": 227,
-    "input_tuner": 67,
-    "input_phono": 65,
-    "pure_direct": 106,
-    "standard": 228,
+    "volume_up": 241,
+    "volume_down": 242,
+    "mute": 240,
+    "input_opt1": 201,
+    "input_opt2": 227,
 }
