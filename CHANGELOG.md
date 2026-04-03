@@ -5,6 +5,14 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2026-04-03
+
+### Fixed
+- **Denon AVR command codes were wrong**: IRDB codes didn't match the actual AVR-2106 remote. Decoded real Broadlink-learned codes to get correct values (e.g., volume_up was 76 in IRDB but 241 in reality).
+
+### Changed
+- Replaced IRDB-sourced Denon commands with codes decoded from actual remote: power_on (225), power_off (226), volume_up (241), volume_down (242), mute (240), input_opt1 (201), input_opt2 (227)
+
 ## [0.5.2] - 2026-04-03
 
 ### Fixed

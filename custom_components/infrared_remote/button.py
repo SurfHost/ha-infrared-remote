@@ -65,12 +65,8 @@ BUTTON_ICONS = {
     "flashback": "mdi:history",
     "power_on": "mdi:power-on",
     "power_off": "mdi:power-off",
-    "input_cd": "mdi:disc",
-    "input_dvd": "mdi:disc-player",
-    "input_tuner": "mdi:radio",
-    "input_phono": "mdi:music-circle",
-    "pure_direct": "mdi:surround-sound",
-    "standard": "mdi:surround-sound-2-0",
+    "input_opt1": "mdi:audio-input-stereo-minijack",
+    "input_opt2": "mdi:audio-input-stereo-minijack",
     "0": "mdi:numeric-0",
     "1": "mdi:numeric-1",
     "2": "mdi:numeric-2",
@@ -111,7 +107,7 @@ async def async_setup_entry(
             name=device_name,
             manufacturer="Infrared Remote",
             model=DEVICE_TYPES.get(device_type, device_type),
-            sw_version="0.5.2",
+            sw_version="0.5.3",
         )
 
     entities: list[ButtonEntity] = []
