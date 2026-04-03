@@ -19,15 +19,25 @@ from .const import (
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
     CONF_INFRARED_ENTITY_ID,
+    DENON_AVR_COMMANDS,
+    DEVICE_TYPE_DENON_AVR,
     DEVICE_TYPE_NEC_TV,
     DEVICE_TYPE_RAW_TEST,
     DEVICE_TYPE_SAMSUNG_TV,
+    DEVICE_TYPE_SHARP_TV,
     DEVICE_TYPES,
     DOMAIN,
     LG_TV_COMMANDS,
     SAMSUNG_TV_COMMANDS,
+    SHARP_TV_COMMANDS,
 )
-from .ir_commands import make_lg_command, make_raw_test_command, make_samsung_command
+from .ir_commands import (
+    make_denon_avr_command,
+    make_lg_command,
+    make_raw_test_command,
+    make_samsung_command,
+    make_sharp_tv_command,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +61,26 @@ BUTTON_ICONS = {
     "pause": "mdi:pause",
     "stop": "mdi:stop",
     "test_signal": "mdi:access-point",
+    "display": "mdi:monitor",
+    "flashback": "mdi:history",
+    "power_on": "mdi:power-on",
+    "power_off": "mdi:power-off",
+    "input_cd": "mdi:disc",
+    "input_dvd": "mdi:disc-player",
+    "input_tuner": "mdi:radio",
+    "input_phono": "mdi:music-circle",
+    "pure_direct": "mdi:surround-sound",
+    "standard": "mdi:surround-sound-2-0",
+    "0": "mdi:numeric-0",
+    "1": "mdi:numeric-1",
+    "2": "mdi:numeric-2",
+    "3": "mdi:numeric-3",
+    "4": "mdi:numeric-4",
+    "5": "mdi:numeric-5",
+    "6": "mdi:numeric-6",
+    "7": "mdi:numeric-7",
+    "8": "mdi:numeric-8",
+    "9": "mdi:numeric-9",
 }
 
 
@@ -81,7 +111,7 @@ async def async_setup_entry(
             name=device_name,
             manufacturer="Infrared Remote",
             model=DEVICE_TYPES.get(device_type, device_type),
-            sw_version="0.4.0",
+            sw_version="0.5.0",
         )
 
     entities: list[ButtonEntity] = []
@@ -105,6 +135,28 @@ async def async_setup_entry(
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
                     command_factory=lambda name=cmd_name: make_samsung_command(name),
+                    device_info=device_info,
+                )
+            )
+    elif device_type == DEVICE_TYPE_SHARP_TV:
+        for cmd_name in SHARP_TV_COMMANDS:
+            entities.append(
+                IRButton(
+                    config_entry=config_entry,
+                    emitter_entity_id=emitter_entity_id,
+                    command_name=cmd_name,
+                    command_factory=lambda name=cmd_name: make_sharp_tv_command(name),
+                    device_info=device_info,
+                )
+            )
+    elif device_type == DEVICE_TYPE_DENON_AVR:
+        for cmd_name in DENON_AVR_COMMANDS:
+            entities.append(
+                IRButton(
+                    config_entry=config_entry,
+                    emitter_entity_id=emitter_entity_id,
+                    command_name=cmd_name,
+                    command_factory=lambda name=cmd_name: make_denon_avr_command(name),
                     device_info=device_info,
                 )
             )
