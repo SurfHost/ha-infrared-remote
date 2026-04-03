@@ -5,6 +5,15 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-04-03
+
+### Added
+- **Reconfigure flow**: "Configure" button on integration entries in Settings > Devices & Services
+  - Shows which infrared emitter is currently linked
+  - Allows changing emitter, device type, and device name after setup
+  - Works for both standalone and attach-to-device entries
+- Added Denon AVR "Stereo" surround mode button (code 230)
+
 ## [0.5.4] - 2026-04-03
 
 ### Added
