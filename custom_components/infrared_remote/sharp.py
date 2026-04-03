@@ -15,12 +15,14 @@ Sharp protocol:
 
 Denon protocol:
   - Carrier: 38 kHz
-  - Header: 264us mark, 789us space
-  - Bit mark: 264us
-  - Bit 1: 264us mark, 1841us space
-  - Bit 0: 264us mark, 789us space
+  - No header pulse (data starts immediately)
+  - Time unit: 264us
+  - Bit mark: 264us (1 unit)
+  - Bit 1: 264us mark, 1848us space (7 units)
+  - Bit 0: 264us mark, 792us space (3 units)
   - Data: 5-bit address + 8-bit command + 2-bit extension (LSB first)
   - Two frames: first with ext=0, second with inverted cmd and ext=3
+  - Frame gap: 43560us (165 units)
 """
 
 from __future__ import annotations
@@ -29,8 +31,6 @@ from .const import (
     DENON_BIT_MARK_US,
     DENON_FRAME_GAP_US,
     DENON_FREQUENCY_KHZ,
-    DENON_HEADER_MARK_US,
-    DENON_HEADER_SPACE_US,
     DENON_ONE_SPACE_US,
     DENON_ZERO_SPACE_US,
     SHARP_BIT_MARK_US,
@@ -134,10 +134,12 @@ class DenonCommand:
     """Denon protocol IR command that provides raw timings.
 
     Denon uses different timing from Sharp (264us base unit vs 320us)
-    and includes a header pulse. The frame structure uses 2 extension
-    bits instead of Sharp's expansion + check bits.
+    and has NO header pulse. Data starts immediately with address bits.
+    Uses 2 extension bits instead of Sharp's expansion + check bits.
 
-    Frame: header + 5-bit address + 8-bit command + 2-bit extension
+    IRP: {38k,264}<1,-3|1,-7>(D:5,F:8,0:2,1,-165,D:5,~F:8,3:2,1,-165)+
+
+    Frame: 5-bit address + 8-bit command + 2-bit extension (no header)
     Two frames: first with ext=0, second with inverted cmd and ext=3.
     """
 
@@ -177,13 +179,8 @@ class DenonCommand:
     def _encode_frame(
         self, command: int, extension: int
     ) -> list[Timing]:
-        """Encode a single Denon frame: header + 15 data bits + stop."""
+        """Encode a single Denon frame: 15 data bits + stop (no header)."""
         timings: list[Timing] = []
-
-        # Header pulse
-        timings.append(
-            Timing(high_us=DENON_HEADER_MARK_US, low_us=DENON_HEADER_SPACE_US)
-        )
 
         # Address: 5 bits
         timings.extend(self._encode_bits_lsb(self.address, 5))
@@ -204,9 +201,9 @@ class DenonCommand:
     def get_raw_timings(self) -> list[Timing]:
         """Get the complete Denon two-frame sequence as raw timings.
 
-        Frame 1: header + address + command + ext=0
-        Gap: ~45ms
-        Frame 2: header + address + ~command + ext=3
+        Frame 1: address + command + ext=0 + stop
+        Gap: 43.5ms
+        Frame 2: address + ~command + ext=3 + stop
         """
         timings: list[Timing] = []
 
