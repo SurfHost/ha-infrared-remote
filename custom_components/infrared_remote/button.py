@@ -116,7 +116,7 @@ async def async_setup_entry(
             name=device_name,
             manufacturer="Infrared Remote",
             model=DEVICE_TYPES.get(device_type, device_type),
-            sw_version="0.5.4",
+            sw_version="0.6.0",
         )
 
     entities: list[ButtonEntity] = []

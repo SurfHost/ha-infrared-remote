@@ -25,11 +25,22 @@
           "infrared_entity_id": "Infrared Emitter",
           "device_type": "Device Type"
         }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Infrared Remote",
+        "description": "Currently linked to emitter: **{emitter}**",
+        "data": {
+          "attach_to_device": "Target Device",
+          "infrared_entity_id": "Infrared Emitter",
+          "device_type": "Device Type",
+          "device_name": "Device Name"
+        }
       }
     },
     "abort": {
       "already_configured": "This configuration already exists.",
-      "no_emitters": "No infrared emitter entities found. Set up an IR emitter first (e.g., Broadlink Infrared Emitter)."
+      "no_emitters": "No infrared emitter entities found. Set up an IR emitter first (e.g., Broadlink Infrared Emitter).",
+      "reconfigure_successful": "Configuration updated successfully."
     }
   }
 }
