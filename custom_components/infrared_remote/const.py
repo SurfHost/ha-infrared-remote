@@ -86,13 +86,13 @@ SHARP_ZERO_SPACE_US = 680
 SHARP_FRAME_GAP_US = 40000  # 40ms gap between first and second (inverted) frame
 
 # Denon Protocol (different timing from Sharp despite similar structure)
+# IRP: {38k,264}<1,-3|1,-7>(D:5,F:8,0:2,1,-165,D:5,~F:8,3:2,1,-165)+
+# No header pulse. Time unit = 264us.
 DENON_FREQUENCY_KHZ = 38
-DENON_BIT_MARK_US = 264
-DENON_HEADER_MARK_US = 264
-DENON_HEADER_SPACE_US = 789
-DENON_ONE_SPACE_US = 1841
-DENON_ZERO_SPACE_US = 789
-DENON_FRAME_GAP_US = 45000  # ~45ms gap between frames
+DENON_BIT_MARK_US = 264  # 1 unit
+DENON_ONE_SPACE_US = 1848  # 7 units (264 * 7)
+DENON_ZERO_SPACE_US = 792  # 3 units (264 * 3)
+DENON_FRAME_GAP_US = 43560  # 165 units (264 * 165)
 
 # Sharp TV codes (address 1) — Sharp Aquos LC series
 SHARP_TV_ADDRESS = 0x01
