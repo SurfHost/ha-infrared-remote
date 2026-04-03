@@ -120,6 +120,58 @@ class NECCommand:
         return timings
 
 
+class RawBroadlinkCommand:
+    """IR command decoded from a Broadlink-learned base64 packet.
+
+    Used for protocols we can't easily encode from scratch (e.g., RC6).
+    Decodes the raw timing data from the Broadlink packet format and
+    provides it as Timing objects compatible with InfraredCommand.
+    """
+
+    def __init__(self, b64_code: str, repeat_count: int = 0) -> None:
+        """Initialize from a Broadlink base64-encoded IR packet."""
+        import base64
+        import struct
+
+        self.repeat_count = repeat_count
+        self.modulation = NEC_FREQUENCY_KHZ  # 38 kHz default
+
+        data = base64.b64decode(b64_code)
+        length = struct.unpack("<H", data[2:4])[0]
+        timing_data = data[4 : 4 + length]
+
+        # Broadlink tick = 269/8192 seconds ≈ 32.84µs
+        tick_us = 269000 / 8192
+
+        raw_us: list[int] = []
+        i = 0
+        while i < len(timing_data):
+            if timing_data[i] == 0x00 and i + 2 < len(timing_data):
+                val = (timing_data[i + 1] << 8) | timing_data[i + 2]
+                i += 3
+            else:
+                val = timing_data[i]
+                i += 1
+            raw_us.append(round(val * tick_us))
+
+        # Convert to mark/space Timing pairs (skip inter-frame gaps > 50ms)
+        self._timings: list[Timing] = []
+        idx = 0
+        while idx + 1 < len(raw_us):
+            mark = raw_us[idx]
+            space = raw_us[idx + 1]
+            if space > 50000:
+                # End of first frame — skip repeat frames
+                self._timings.append(Timing(high_us=mark, low_us=mark))
+                break
+            self._timings.append(Timing(high_us=mark, low_us=space))
+            idx += 2
+
+    def get_raw_timings(self) -> list[Timing]:
+        """Get the decoded raw timings."""
+        return self._timings
+
+
 class RawTestCommand:
     """A simple raw test signal for verifying the IR chain works.
 

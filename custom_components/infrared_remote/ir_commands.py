@@ -22,13 +22,16 @@ except ImportError:
         "infrared-protocols library not available, using built-in NEC encoder"
     )
 
-from .nec import NECCommand, RawTestCommand  # noqa: E402
+from .nec import NECCommand, RawBroadlinkCommand, RawTestCommand  # noqa: E402
 from .sharp import DenonCommand, SharpCommand  # noqa: E402
 from .const import (  # noqa: E402
+    AMINO_STB_BROADLINK_CODES,
     DENON_AVR_ADDRESS,
     DENON_AVR_COMMANDS,
     LG_TV_ADDRESS,
     LG_TV_COMMANDS,
+    PHILIPS_LAMP_ADDRESS,
+    PHILIPS_LAMP_COMMANDS,
     SAMSUNG_TV_ADDRESS,
     SAMSUNG_TV_COMMANDS,
     SHARP_TV_ADDRESS,
@@ -101,6 +104,29 @@ def make_denon_avr_command(command_name: str) -> DenonCommand | None:
     if code is None:
         return None
     return DenonCommand(address=DENON_AVR_ADDRESS, command=code)
+
+
+def make_philips_lamp_command(command_name: str) -> NECCommand | None:
+    """Create an IR command for a Philips RGBIC lamp.
+
+    Uses NEC protocol with address 0x00.
+    """
+    code = PHILIPS_LAMP_COMMANDS.get(command_name)
+    if code is None:
+        return None
+    return NECCommand(address=PHILIPS_LAMP_ADDRESS, command=code)
+
+
+def make_amino_stb_command(command_name: str) -> RawBroadlinkCommand | None:
+    """Create an IR command for an Amino Kamai set-top box.
+
+    Uses raw Broadlink-learned codes (RC6 protocol is too complex
+    to encode from scratch).
+    """
+    b64_code = AMINO_STB_BROADLINK_CODES.get(command_name)
+    if b64_code is None:
+        return None
+    return RawBroadlinkCommand(b64_code)
 
 
 def make_raw_test_command() -> RawTestCommand:

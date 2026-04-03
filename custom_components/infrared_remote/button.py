@@ -15,25 +15,31 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
+    AMINO_STB_BROADLINK_CODES,
     CONF_ATTACH_TO_DEVICE,
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
     CONF_INFRARED_ENTITY_ID,
     DENON_AVR_COMMANDS,
+    DEVICE_TYPE_AMINO_STB,
     DEVICE_TYPE_DENON_AVR,
     DEVICE_TYPE_NEC_TV,
+    DEVICE_TYPE_PHILIPS_LAMP,
     DEVICE_TYPE_RAW_TEST,
     DEVICE_TYPE_SAMSUNG_TV,
     DEVICE_TYPE_SHARP_TV,
     DEVICE_TYPES,
     DOMAIN,
     LG_TV_COMMANDS,
+    PHILIPS_LAMP_COMMANDS,
     SAMSUNG_TV_COMMANDS,
     SHARP_TV_COMMANDS,
 )
 from .ir_commands import (
+    make_amino_stb_command,
     make_denon_avr_command,
     make_lg_command,
+    make_philips_lamp_command,
     make_raw_test_command,
     make_samsung_command,
     make_sharp_tv_command,
@@ -86,6 +92,21 @@ BUTTON_ICONS = {
     "7": "mdi:numeric-7",
     "8": "mdi:numeric-8",
     "9": "mdi:numeric-9",
+    # Philips lamp
+    "on": "mdi:lightbulb-on",
+    "off": "mdi:lightbulb-off",
+    "brightness_up": "mdi:brightness-7",
+    "brightness_down": "mdi:brightness-5",
+    "red": "mdi:palette",
+    "green": "mdi:palette",
+    "blue": "mdi:palette",
+    "white": "mdi:white-balance-sunny",
+    "orange": "mdi:palette",
+    "yellow": "mdi:palette",
+    "night_mode": "mdi:weather-night",
+    # Amino STB
+    "forward": "mdi:fast-forward",
+    "rewind": "mdi:rewind",
 }
 
 
@@ -116,7 +137,7 @@ async def async_setup_entry(
             name=device_name,
             manufacturer="Infrared Remote",
             model=DEVICE_TYPES.get(device_type, device_type),
-            sw_version="0.6.0",
+            sw_version="0.7.0",
         )
 
     entities: list[ButtonEntity] = []
@@ -162,6 +183,28 @@ async def async_setup_entry(
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
                     command_factory=lambda name=cmd_name: make_denon_avr_command(name),
+                    device_info=device_info,
+                )
+            )
+    elif device_type == DEVICE_TYPE_PHILIPS_LAMP:
+        for cmd_name in PHILIPS_LAMP_COMMANDS:
+            entities.append(
+                IRButton(
+                    config_entry=config_entry,
+                    emitter_entity_id=emitter_entity_id,
+                    command_name=cmd_name,
+                    command_factory=lambda name=cmd_name: make_philips_lamp_command(name),
+                    device_info=device_info,
+                )
+            )
+    elif device_type == DEVICE_TYPE_AMINO_STB:
+        for cmd_name in AMINO_STB_BROADLINK_CODES:
+            entities.append(
+                IRButton(
+                    config_entry=config_entry,
+                    emitter_entity_id=emitter_entity_id,
+                    command_name=cmd_name,
+                    command_factory=lambda name=cmd_name: make_amino_stb_command(name),
                     device_info=device_info,
                 )
             )

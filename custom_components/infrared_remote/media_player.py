@@ -22,7 +22,9 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_INFRARED_ENTITY_ID,
     DEVICE_TYPE_DENON_AVR,
+    DEVICE_TYPE_AMINO_STB,
     DEVICE_TYPE_NEC_TV,
+    DEVICE_TYPE_PHILIPS_LAMP,
     DEVICE_TYPE_RAW_TEST,
     DEVICE_TYPE_SAMSUNG_TV,
     DEVICE_TYPE_SHARP_TV,
@@ -54,7 +56,7 @@ async def async_setup_entry(
     if config_entry.data.get(CONF_ATTACH_TO_DEVICE):
         return  # Existing device already has a media player
 
-    if device_type == DEVICE_TYPE_RAW_TEST:
+    if device_type in (DEVICE_TYPE_RAW_TEST, DEVICE_TYPE_PHILIPS_LAMP, DEVICE_TYPE_AMINO_STB):
         return
 
     if device_type == DEVICE_TYPE_NEC_TV:
@@ -73,7 +75,7 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Infrared Remote",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.6.0",
+        sw_version="0.7.0",
     )
 
     # Denon AVR has discrete power on/off commands
