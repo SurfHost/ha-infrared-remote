@@ -5,6 +5,11 @@ All notable changes to the Infrared Remote integration will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-04-03
+
+### Fixed
+- **Denon AVR not working**: Denon uses different timing from Sharp (264µs vs 320µs base unit) and requires a header pulse. Split into separate `DenonCommand` encoder with correct timing: 264µs mark, 789µs/1841µs spaces, header pulse, and proper 2-bit extension frame structure.
+
 ## [0.5.0] - 2026-04-03
 
 ### Added

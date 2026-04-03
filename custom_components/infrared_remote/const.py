@@ -78,12 +78,21 @@ SAMSUNG_TV_COMMANDS = {
     "menu": 0x1A,
 }
 
-# Sharp/Denon Protocol
+# Sharp Protocol
 SHARP_FREQUENCY_KHZ = 38
 SHARP_BIT_MARK_US = 320
 SHARP_ONE_SPACE_US = 1680
 SHARP_ZERO_SPACE_US = 680
 SHARP_FRAME_GAP_US = 40000  # 40ms gap between first and second (inverted) frame
+
+# Denon Protocol (different timing from Sharp despite similar structure)
+DENON_FREQUENCY_KHZ = 38
+DENON_BIT_MARK_US = 264
+DENON_HEADER_MARK_US = 264
+DENON_HEADER_SPACE_US = 789
+DENON_ONE_SPACE_US = 1841
+DENON_ZERO_SPACE_US = 789
+DENON_FRAME_GAP_US = 45000  # ~45ms gap between frames
 
 # Sharp TV codes (address 1) — Sharp Aquos LC series
 SHARP_TV_ADDRESS = 0x01

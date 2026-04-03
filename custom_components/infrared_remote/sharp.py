@@ -1,27 +1,38 @@
-"""Sharp/Denon IR protocol encoder.
+"""Sharp and Denon IR protocol encoders.
 
-Both Sharp and Denon use the same protocol family (Sharp invented it,
-Denon licensed it). This module provides a single encoder for both.
+Despite being in the same protocol family, Sharp and Denon use different
+timing values and slightly different frame structures. This module
+provides separate encoders for each.
 
-Sharp/Denon protocol:
+Sharp protocol:
   - Carrier: 38 kHz
-  - Pulse distance encoding
+  - No header pulse
   - Bit mark: 320us
-  - Bit 1: 320us mark, 1680us space (~2ms total)
-  - Bit 0: 320us mark, 680us space (~1ms total)
-  - Data: 5-bit address + 8-bit command + 1 expansion bit + 1 check bit
-  - LSB first
-  - Two frames: first normal, 40ms gap, second with inverted
-    command + expansion + check bits
-  - Stop bit: 320us mark after each frame
+  - Bit 1: 320us mark, 1680us space
+  - Bit 0: 320us mark, 680us space
+  - Data: 5-bit address + 8-bit command + 1 expansion + 1 check (LSB first)
+  - Two frames: first normal, 40ms gap, second with inverted cmd/exp/chk
 
-Sharp TV uses address 1, expansion bit = 1, check bit = 0.
-Denon AVR uses address 2, expansion bit = 1, check bit = 0.
+Denon protocol:
+  - Carrier: 38 kHz
+  - Header: 264us mark, 789us space
+  - Bit mark: 264us
+  - Bit 1: 264us mark, 1841us space
+  - Bit 0: 264us mark, 789us space
+  - Data: 5-bit address + 8-bit command + 2-bit extension (LSB first)
+  - Two frames: first with ext=0, second with inverted cmd and ext=3
 """
 
 from __future__ import annotations
 
 from .const import (
+    DENON_BIT_MARK_US,
+    DENON_FRAME_GAP_US,
+    DENON_FREQUENCY_KHZ,
+    DENON_HEADER_MARK_US,
+    DENON_HEADER_SPACE_US,
+    DENON_ONE_SPACE_US,
+    DENON_ZERO_SPACE_US,
     SHARP_BIT_MARK_US,
     SHARP_FRAME_GAP_US,
     SHARP_FREQUENCY_KHZ,
@@ -32,13 +43,9 @@ from .nec import Timing
 
 
 class SharpCommand:
-    """Sharp/Denon protocol IR command that provides raw timings.
+    """Sharp protocol IR command that provides raw timings.
 
-    Implements the same interface as NECCommand / InfraredCommand:
-    - modulation: carrier frequency in kHz
-    - repeat_count: number of times to repeat
-    - get_raw_timings(): returns list of Timing objects
-
+    Implements the same interface as NECCommand / InfraredCommand.
     Encodes a 5-bit address and 8-bit command into the Sharp two-frame format.
     """
 
@@ -50,13 +57,13 @@ class SharpCommand:
         check: int = 0,
         repeat_count: int = 0,
     ) -> None:
-        """Initialize Sharp/Denon command.
+        """Initialize Sharp command.
 
         Args:
             address: 5-bit device address (0x00-0x1F)
             command: 8-bit command code (0x00-0xFF)
-            expansion: expansion bit (1 for Sharp TV, 1 for Denon)
-            check: check bit (0 for first frame, 1 for second)
+            expansion: expansion bit (typically 1)
+            check: check bit (typically 0)
             repeat_count: number of additional times to transmit
         """
         self.address = address & 0x1F
@@ -82,12 +89,7 @@ class SharpCommand:
         return timings
 
     def _encode_frame(self, invert: bool = False) -> list[Timing]:
-        """Encode a single Sharp frame (15 bits + stop).
-
-        Args:
-            invert: if True, invert command, expansion, and check bits
-                    (used for the second verification frame)
-        """
+        """Encode a single Sharp frame (15 bits + stop)."""
         timings: list[Timing] = []
 
         # Address: 5 bits (same in both frames)
@@ -111,24 +113,114 @@ class SharpCommand:
         return timings
 
     def get_raw_timings(self) -> list[Timing]:
-        """Get the complete Sharp two-frame sequence as raw timings.
-
-        Frame structure:
-          [frame 1: addr + cmd + exp + chk + stop]
-          [40ms gap]
-          [frame 2: addr + ~cmd + ~exp + ~chk + stop]
-        """
+        """Get the complete Sharp two-frame sequence as raw timings."""
         timings: list[Timing] = []
 
         # First frame (normal)
         timings.extend(self._encode_frame(invert=False))
 
-        # Replace the last timing's space with the 40ms inter-frame gap
+        # Replace the last timing's space with the inter-frame gap
         if timings:
             last = timings[-1]
             timings[-1] = Timing(high_us=last.high_us, low_us=SHARP_FRAME_GAP_US)
 
         # Second frame (inverted command/expansion/check)
         timings.extend(self._encode_frame(invert=True))
+
+        return timings
+
+
+class DenonCommand:
+    """Denon protocol IR command that provides raw timings.
+
+    Denon uses different timing from Sharp (264us base unit vs 320us)
+    and includes a header pulse. The frame structure uses 2 extension
+    bits instead of Sharp's expansion + check bits.
+
+    Frame: header + 5-bit address + 8-bit command + 2-bit extension
+    Two frames: first with ext=0, second with inverted cmd and ext=3.
+    """
+
+    def __init__(
+        self,
+        address: int,
+        command: int,
+        repeat_count: int = 0,
+    ) -> None:
+        """Initialize Denon command.
+
+        Args:
+            address: 5-bit device address (0x00-0x1F)
+            command: 8-bit command code (0x00-0xFF)
+            repeat_count: number of additional times to transmit
+        """
+        self.address = address & 0x1F
+        self.command = command & 0xFF
+        self.repeat_count = repeat_count
+        self.modulation = DENON_FREQUENCY_KHZ
+
+    def _encode_bits_lsb(self, value: int, num_bits: int) -> list[Timing]:
+        """Encode bits as Denon timings, LSB first."""
+        timings = []
+        for bit_idx in range(num_bits):
+            bit = (value >> bit_idx) & 1
+            if bit:
+                timings.append(
+                    Timing(high_us=DENON_BIT_MARK_US, low_us=DENON_ONE_SPACE_US)
+                )
+            else:
+                timings.append(
+                    Timing(high_us=DENON_BIT_MARK_US, low_us=DENON_ZERO_SPACE_US)
+                )
+        return timings
+
+    def _encode_frame(
+        self, command: int, extension: int
+    ) -> list[Timing]:
+        """Encode a single Denon frame: header + 15 data bits + stop."""
+        timings: list[Timing] = []
+
+        # Header pulse
+        timings.append(
+            Timing(high_us=DENON_HEADER_MARK_US, low_us=DENON_HEADER_SPACE_US)
+        )
+
+        # Address: 5 bits
+        timings.extend(self._encode_bits_lsb(self.address, 5))
+
+        # Command: 8 bits
+        timings.extend(self._encode_bits_lsb(command, 8))
+
+        # Extension: 2 bits
+        timings.extend(self._encode_bits_lsb(extension, 2))
+
+        # Stop bit
+        timings.append(
+            Timing(high_us=DENON_BIT_MARK_US, low_us=DENON_ZERO_SPACE_US)
+        )
+
+        return timings
+
+    def get_raw_timings(self) -> list[Timing]:
+        """Get the complete Denon two-frame sequence as raw timings.
+
+        Frame 1: header + address + command + ext=0
+        Gap: ~45ms
+        Frame 2: header + address + ~command + ext=3
+        """
+        timings: list[Timing] = []
+
+        # First frame: normal command, extension = 0
+        timings.extend(self._encode_frame(self.command, extension=0))
+
+        # Replace the last timing's space with the inter-frame gap
+        if timings:
+            last = timings[-1]
+            timings[-1] = Timing(high_us=last.high_us, low_us=DENON_FRAME_GAP_US)
+
+        # Second frame: inverted command, extension = 3
+        timings.extend(
+            self._encode_frame(~self.command & 0xFF, extension=3)
+        )
 
         return timings
