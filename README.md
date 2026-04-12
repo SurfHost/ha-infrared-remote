@@ -1,5 +1,6 @@
 # Infrared Remote
 
+[![Validate](https://github.com/SurfHost/ha-infrared-remote/actions/workflows/validate.yml/badge.svg)](https://github.com/SurfHost/ha-infrared-remote/actions/workflows/validate.yml)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
 Custom Home Assistant integration that creates **button** and **media_player** entities to control IR devices (TVs, etc.) through the Home Assistant 2026.4 infrared platform.
