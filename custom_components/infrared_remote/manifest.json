@@ -1,11 +1,12 @@
 {
   "domain": "infrared_remote",
   "name": "Infrared Remote",
-  "version": "0.7.0",
-  "documentation": "https://github.com/SurfHost/ha-infrared-remote",
-  "dependencies": ["infrared"],
   "codeowners": ["@SurfHost"],
   "config_flow": true,
+  "dependencies": ["infrared"],
+  "documentation": "https://github.com/SurfHost/ha-infrared-remote",
+  "integration_type": "device",
   "iot_class": "local_push",
-  "integration_type": "device"
+  "issue_tracker": "https://github.com/SurfHost/ha-infrared-remote/issues",
+  "version": "0.7.0"
 }
