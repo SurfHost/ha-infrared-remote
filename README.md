@@ -3,9 +3,6 @@
 [![Validate](https://github.com/SurfHost/ha-infrared-remote/actions/workflows/validate.yml/badge.svg)](https://github.com/SurfHost/ha-infrared-remote/actions/workflows/validate.yml)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-[![Add Repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SurfHost&repository=ha-infrared-remote&category=integration)
-[![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=infrared_remote)
-
 Custom Home Assistant integration that creates **button** and **media_player** entities to control IR devices (TVs, etc.) through the Home Assistant 2026.4 infrared platform.
 
 ## What does this do?
@@ -37,7 +34,13 @@ Set it up, pick your emitter, choose your device type, and you get:
 - Home Assistant **2026.4** or later
 - An infrared emitter entity (e.g., Broadlink Infrared Emitter, ESPHome IR proxy)
 
-## Installation via HACS
+## Installation
+
+### HACS (Recommended)
+
+[![Add Repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SurfHost&repository=ha-infrared-remote&category=integration)
+
+Or manually:
 
 1. Open HACS in Home Assistant
 2. Click the three dots in the top right and select **Custom repositories**
@@ -45,7 +48,17 @@ Set it up, pick your emitter, choose your device type, and you get:
 4. Click **Download**
 5. Restart Home Assistant
 
+### Manual
+
+1. Download the `custom_components/infrared_remote` folder
+2. Place it in your Home Assistant `config/custom_components/` directory
+3. Restart Home Assistant
+
 ## Setup
+
+[![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=infrared_remote)
+
+Or manually:
 
 1. Go to **Settings > Devices & Services > Add Integration**
 2. Search for **Infrared Remote**
