@@ -5,6 +5,16 @@
 
 Custom Home Assistant integration that creates **button**, **media_player**, **fan**, and **light** entities to control IR and RF devices through the Home Assistant 2026.4 `infrared` and 2026.5 `radio_frequency` platforms.
 
+## Quick install
+
+[![Add Repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SurfHost&repository=ha-remote-devices&category=integration)
+[![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=remote_devices)
+
+1. Click **Add Repository to HACS**, then download and restart Home Assistant.
+2. Click **Add Integration**, pick a device type, then pick the matching emitter.
+
+> Requires an emitter integration first — install [Broadlink IR/RF Emitter](https://github.com/SurfHost/ha-broadlink-emitter) (or any other compatible emitter) before adding devices here.
+
 ## What does this do?
 
 This is a **consumer integration** for the HA `infrared` and `radio_frequency` platforms. It sends commands through any compatible emitter (like [Broadlink IR/RF Emitter](https://github.com/SurfHost/ha-broadlink-emitter) or ESPHome).
