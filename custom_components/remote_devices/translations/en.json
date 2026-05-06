@@ -1,0 +1,60 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Remote Devices",
+        "description": "Choose how to set up your IR or RF remote.",
+        "data": {
+          "setup_mode": "Setup mode"
+        }
+      },
+      "new_device": {
+        "title": "Choose device type",
+        "description": "Pick what kind of device you want to control. Optionally give it a name.",
+        "data": {
+          "device_type": "Device Type",
+          "device_name": "Device Name (optional, e.g. 'Woonkamer TV')"
+        }
+      },
+      "select_emitter": {
+        "title": "Select {protocol} emitter",
+        "description": "{device_type} uses the {protocol} protocol. Pick which {protocol} emitter to use.",
+        "data": {
+          "emitter_entity_id": "Emitter"
+        }
+      },
+      "attach": {
+        "title": "Attach to existing device",
+        "description": "Add button entities to an existing device. No media player will be created.",
+        "data": {
+          "attach_to_device": "Target Device",
+          "device_type": "Device Type"
+        }
+      },
+      "attach_select_emitter": {
+        "title": "Select {protocol} emitter",
+        "description": "{device_type} uses the {protocol} protocol. Pick which {protocol} emitter to use.",
+        "data": {
+          "emitter_entity_id": "Emitter"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Remote Devices",
+        "description": "Currently linked to emitter: **{emitter}**",
+        "data": {
+          "attach_to_device": "Target Device",
+          "emitter_entity_id": "Emitter",
+          "device_type": "Device Type",
+          "device_name": "Device Name"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This configuration already exists.",
+      "no_emitters": "No infrared or radio_frequency emitter entities found. Set up an emitter integration first (e.g., Broadlink IR/RF Emitter).",
+      "no_ir_emitters": "No infrared emitter entities found. Set up an IR emitter integration first.",
+      "no_rf_emitters": "No radio_frequency transmitter entities found. Set up an RF emitter integration first (e.g., Broadlink IR/RF Emitter on an RM4 Pro).",
+      "reconfigure_successful": "Configuration updated successfully."
+    }
+  }
+}

@@ -1,4 +1,4 @@
-"""Media player platform for Infrared Remote."""
+"""Media player platform for Remote Devices."""
 
 from __future__ import annotations
 
@@ -20,9 +20,10 @@ from .const import (
     CONF_ATTACH_TO_DEVICE,
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
-    CONF_INFRARED_ENTITY_ID,
-    DEVICE_TYPE_DENON_AVR,
+    CONF_EMITTER_ENTITY_ID,
+    DEVICE_TYPE_AIRWIT_FAN,
     DEVICE_TYPE_AMINO_STB,
+    DEVICE_TYPE_DENON_AVR,
     DEVICE_TYPE_NEC_TV,
     DEVICE_TYPE_PHILIPS_LAMP,
     DEVICE_TYPE_RAW_TEST,
@@ -46,17 +47,22 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Infrared Remote media player entities."""
-    emitter_entity_id = config_entry.data[CONF_INFRARED_ENTITY_ID]
+    """Set up Remote Devices media player entities."""
+    emitter_entity_id = config_entry.data[CONF_EMITTER_ENTITY_ID]
     device_type = config_entry.data[CONF_DEVICE_TYPE]
     device_name = config_entry.data.get(
-        CONF_DEVICE_NAME, DEVICE_TYPES.get(device_type, "IR Remote")
+        CONF_DEVICE_NAME, DEVICE_TYPES.get(device_type, "Remote Device")
     )
 
     if config_entry.data.get(CONF_ATTACH_TO_DEVICE):
         return  # Existing device already has a media player
 
-    if device_type in (DEVICE_TYPE_RAW_TEST, DEVICE_TYPE_PHILIPS_LAMP, DEVICE_TYPE_AMINO_STB):
+    if device_type in (
+        DEVICE_TYPE_RAW_TEST,
+        DEVICE_TYPE_PHILIPS_LAMP,
+        DEVICE_TYPE_AMINO_STB,
+        DEVICE_TYPE_AIRWIT_FAN,
+    ):
         return
 
     if device_type == DEVICE_TYPE_NEC_TV:
@@ -73,9 +79,9 @@ async def async_setup_entry(
     device_info = DeviceInfo(
         identifiers={(DOMAIN, config_entry.entry_id)},
         name=device_name,
-        manufacturer="Infrared Remote",
+        manufacturer="Remote Devices",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.7.0",
+        sw_version="0.8.0",
     )
 
     # Denon AVR has discrete power on/off commands

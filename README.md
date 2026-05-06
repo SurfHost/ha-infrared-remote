@@ -1,44 +1,46 @@
-# Infrared Remote
+# Remote Devices
 
-[![Validate](https://github.com/SurfHost/ha-infrared-remote/actions/workflows/validate.yml/badge.svg)](https://github.com/SurfHost/ha-infrared-remote/actions/workflows/validate.yml)
+[![Validate](https://github.com/SurfHost/ha-remote-devices/actions/workflows/validate.yml/badge.svg)](https://github.com/SurfHost/ha-remote-devices/actions/workflows/validate.yml)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-Custom Home Assistant integration that creates **button** and **media_player** entities to control IR devices (TVs, etc.) through the Home Assistant 2026.4 infrared platform.
+Custom Home Assistant integration that creates **button**, **media_player**, **fan**, and **light** entities to control IR and RF devices through the Home Assistant 2026.4 `infrared` and 2026.5 `radio_frequency` platforms.
 
 ## What does this do?
 
-This is a **consumer integration** for the HA 2026.4 infrared platform. It sends IR commands through any available infrared emitter (like [Broadlink Infrared Emitter](https://github.com/SurfHost/ha-broadlink-infrared) or ESPHome IR proxy).
+This is a **consumer integration** for the HA `infrared` and `radio_frequency` platforms. It sends commands through any compatible emitter (like [Broadlink IR/RF Emitter](https://github.com/SurfHost/ha-broadlink-emitter) or ESPHome).
 
-Set it up, pick your emitter, choose your device type, and you get:
+Set it up, pick your device type, pick the matching emitter (the integration filters automatically based on whether the device uses IR or RF), and you get appropriate HA-native entities:
 
-- A **media_player** entity for your TV or receiver (power, volume, mute)
-- **Button** entities for all remote functions
-- Option to **attach IR buttons to an existing device** (like Battery Notes does)
-- **Reconfigure** after setup — see and change the linked emitter
-- Everything works through the new infrared platform with proper HA integration
+- A **media_player** entity for TVs and AV receivers (power, volume, mute)
+- A **fan** entity for ceiling fans (speed, preset modes, direction)
+- A **light** entity for lamps (on/off)
+- **Button** entities for everything else
+- Option to **attach to an existing device** (like Battery Notes does) instead of creating a separate one
+- **Reconfigure** support — change emitter, type, or name after setup
 
 ## Supported devices
 
-| Device Type | Protocol | Buttons | Media Player |
-|-------------|----------|---------|--------------|
-| LG TV | NEC (addr 0x04) | 18 | Yes (TV) |
-| Samsung TV | NEC (addr 0x07) | 15 | Yes (TV) |
-| Sharp TV (Aquos) | Sharp (addr 0x01) | 20 | Yes (TV) |
-| Denon AVR Receiver | Denon (addr 0x02) | 16 | Yes (Receiver) |
-| Philips RGBIC Lamp | NEC (addr 0x00) | 11 | No |
-| Amino Kamai 7X STB | RC6 (raw learned) | 8 | No |
-| Raw Test | Raw burst | 1 | No |
+| Device Type | Protocol | Entities |
+|-------------|----------|----------|
+| LG TV | IR — NEC (addr 0x04) | media_player + 18 buttons |
+| Samsung TV | IR — NEC (addr 0x07) | media_player + 15 buttons |
+| Sharp TV (Aquos) | IR — Sharp (addr 0x01) | media_player + 20 buttons |
+| Denon AVR Receiver | IR — Denon (addr 0x02) | media_player + 16 buttons |
+| Philips RGBIC Lamp | IR — NEC (addr 0x00) | 11 buttons |
+| Amino Kamai 7X STB | IR — RC6 (raw learned) | 8 buttons |
+| Raw Test | IR — raw burst | 1 button |
+| **Airwit Plafondventilator** | **RF 433 MHz — raw learned** | **fan + light + 3 buttons** |
 
 ## Requirements
 
-- Home Assistant **2026.4** or later
-- An infrared emitter entity (e.g., Broadlink Infrared Emitter, ESPHome IR proxy)
+- Home Assistant **2026.5** or later
+- An IR or RF emitter integration (e.g., [Broadlink IR/RF Emitter](https://github.com/SurfHost/ha-broadlink-emitter), ESPHome IR/RF proxy)
 
 ## Installation
 
 ### HACS (Recommended)
 
-[![Add Repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SurfHost&repository=ha-infrared-remote&category=integration)
+[![Add Repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SurfHost&repository=ha-remote-devices&category=integration)
 
 Or manually:
 
@@ -50,29 +52,49 @@ Or manually:
 
 ### Manual
 
-1. Download the `custom_components/infrared_remote` folder
+1. Download the `custom_components/remote_devices` folder
 2. Place it in your Home Assistant `config/custom_components/` directory
 3. Restart Home Assistant
 
 ## Setup
 
-[![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=infrared_remote)
+[![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=remote_devices)
 
 Or manually:
 
 1. Go to **Settings > Devices & Services > Add Integration**
-2. Search for **Infrared Remote**
-3. Select your infrared emitter
-4. Choose the device type (e.g., "NEC TV (LG)")
-5. Optionally give it a name (e.g., "Woonkamer TV")
-6. Your TV now shows up as a media_player with button entities
+2. Search for **Remote Devices**
+3. Choose setup mode (new device or attach to existing)
+4. Pick the device type (e.g., "Airwit Plafondventilator (RF 433 MHz)")
+5. Pick the matching emitter (only emitters compatible with your device type's protocol are shown)
+6. Optionally give it a name (e.g., "Slaapkamer ventilator")
+7. Done — your fan/TV/lamp now shows up as proper HA entities
+
+## Airwit Plafondventilator
+
+The Airwit ceiling fan is exposed as **three entities under one device**, so you get HA-native control:
+
+- `fan.airwit_plafondventilator` — speeds 1-6 (mapped to 17%/33%/50%/67%/83%/100%), `natural_wind` preset, forward/reverse direction
+- `light.airwit_plafondventilator_lamp` — on/off (lamp is a single toggle code; state is optimistic)
+- 3 buttons: `brightness_up`, `brightness_down`, `all_off`
+
+This means voice assistants ("Alexa, set ceiling fan to medium"), Lovelace fan/light cards, scenes, and standard automations all work without scripts.
 
 ## Testing
 
-1. **Raw test first**: Set up with "Raw Test Signal". Press the button. If your IR blaster blinks, the chain works.
-2. **TV test**: Set up with your TV type. Point the blaster at the TV and press Power.
-3. **Dashboard**: Add the media_player entity for a proper TV control card.
+1. **Raw test first** (IR): Set up with "Raw Test Signal". Press the button. If your IR blaster blinks, the chain works.
+2. **TV / receiver / fan**: Set up with the matching device type and emitter.
+3. **Dashboard**: Add the appropriate fan/light/media_player card.
 
 ## Adding more device types
 
-Built-in protocol encoders: **NEC**, **Sharp**, and **Denon**. For unsupported protocols, Broadlink-learned codes can be stored as raw timings. PRs welcome!
+Built-in protocol encoders: **NEC**, **Sharp**, and **Denon** for IR. RF (Airwit) uses raw Broadlink-learned packets. For unsupported protocols, learned codes can be stored as raw timings — see [`rf_commands.py`](custom_components/remote_devices/rf_commands.py) and [`nec.py`](custom_components/remote_devices/nec.py) for the pattern. PRs welcome!
+
+## Upgrading from 0.7.x (`infrared_remote`)
+
+Version 0.8.0 renames the integration from `infrared_remote` to `remote_devices` to reflect that it now handles both IR and RF. To upgrade:
+
+1. Remove the old "Infrared Remote" config entries from **Settings > Devices & Services**
+2. Update via HACS (or replace the `custom_components/infrared_remote` folder with `custom_components/remote_devices`)
+3. Restart Home Assistant
+4. Add the new "Remote Devices" integration and re-create your devices

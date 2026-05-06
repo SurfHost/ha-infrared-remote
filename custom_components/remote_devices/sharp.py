@@ -39,7 +39,7 @@ from .const import (
     SHARP_ONE_SPACE_US,
     SHARP_ZERO_SPACE_US,
 )
-from .nec import Timing
+from .broadlink_decode import Timing
 
 
 class SharpCommand:

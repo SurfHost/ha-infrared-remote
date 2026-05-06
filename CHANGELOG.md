@@ -1,9 +1,35 @@
 # Changelog
 
-All notable changes to the Infrared Remote integration will be documented in this file.
+All notable changes to the Remote Devices integration will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.8.0] - 2026-05-06
+
+### Added
+- **RF (radio frequency) device support** via the new HA 2026.5 `radio_frequency` platform
+- **Airwit Plafondventilator (ceiling fan)** device type — RF 433 MHz, OOK modulation
+  - 13 captured commands: lamp toggle, fan speeds 1-6, natural wind preset, brightness up/down, fan off, all off, fan direction
+  - Exposed as a `fan` entity (speed + preset + direction), a `light` entity (lamp toggle), and 3 buttons (brightness_up, brightness_down, all_off)
+  - Voice control, Lovelace fan/light cards, scenes, and automations all work natively
+- New `rf_commands.py` with `RawBroadlinkRFCommand` — mirrors the IR `RawBroadlinkCommand` pattern but produces `RadioFrequencyCommand` objects with frequency + OOK modulation
+- New `broadlink_decode.py` shared helper extracted from `nec.py` — used by both IR and RF raw-command classes
+- Pre-decoding: every Airwit code is decoded once at module import (i7-class HA, no point paying the cost on every press)
+- Two-step config flow: pick device type first, then the integration shows only the protocol-matching emitters (IR or RF)
+
+### Changed
+- **Renamed integration domain `infrared_remote` → `remote_devices`** (breaking; existing users must remove and re-add config entries)
+- Renamed integration title from "Infrared Remote" to "Remote Devices"
+- `manifest.json` adds `radio_frequency` to dependencies and bumps minimum HA to 2026.5
+- Renamed config key `CONF_INFRARED_ENTITY_ID` → `CONF_EMITTER_ENTITY_ID` (and stored value `infrared_entity_id` → `emitter_entity_id`) since emitters are no longer IR-only
+- `button.py`: extracted `_RemoteButtonBase`; `IRButton` and `RFButton` subclasses dispatch to the right HA platform
+- DeviceInfo `manufacturer` is now "Remote Devices" (was "Infrared Remote") and `sw_version` reflects the integration version
+
+### Migration from 0.7.x
+- Remove existing "Infrared Remote" config entries
+- Update via HACS or replace the custom_components folder
+- Add the new "Remote Devices" integration; re-create your TVs, receivers, lamps, etc.
 
 ## [0.7.0] - 2026-04-03
 

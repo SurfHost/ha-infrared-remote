@@ -1,11 +1,16 @@
-"""Button platform for Infrared Remote."""
+"""Button platform for Remote Devices.
+
+Creates one button entity per command for the configured device. IR devices
+dispatch via the `infrared` platform; RF devices via `radio_frequency`.
+"""
 
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
-from homeassistant.components import infrared
+from homeassistant.components import infrared, radio_frequency
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -19,8 +24,10 @@ from .const import (
     CONF_ATTACH_TO_DEVICE,
     CONF_DEVICE_NAME,
     CONF_DEVICE_TYPE,
-    CONF_INFRARED_ENTITY_ID,
+    CONF_EMITTER_ENTITY_ID,
     DENON_AVR_COMMANDS,
+    DEVICE_PROTOCOLS,
+    DEVICE_TYPE_AIRWIT_FAN,
     DEVICE_TYPE_AMINO_STB,
     DEVICE_TYPE_DENON_AVR,
     DEVICE_TYPE_NEC_TV,
@@ -44,6 +51,7 @@ from .ir_commands import (
     make_samsung_command,
     make_sharp_tv_command,
 )
+from .rf_commands import make_airwit_fan_command
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,7 +100,6 @@ BUTTON_ICONS = {
     "7": "mdi:numeric-7",
     "8": "mdi:numeric-8",
     "9": "mdi:numeric-9",
-    # Philips lamp
     "on": "mdi:lightbulb-on",
     "off": "mdi:lightbulb-off",
     "brightness_up": "mdi:brightness-7",
@@ -104,9 +111,9 @@ BUTTON_ICONS = {
     "orange": "mdi:palette",
     "yellow": "mdi:palette",
     "night_mode": "mdi:weather-night",
-    # Amino STB
     "forward": "mdi:fast-forward",
     "rewind": "mdi:rewind",
+    "all_off": "mdi:power-off",
 }
 
 
@@ -115,11 +122,11 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Infrared Remote button entities."""
-    emitter_entity_id = config_entry.data[CONF_INFRARED_ENTITY_ID]
+    """Set up button entities for the configured device."""
+    emitter_entity_id = config_entry.data[CONF_EMITTER_ENTITY_ID]
     device_type = config_entry.data[CONF_DEVICE_TYPE]
     device_name = config_entry.data.get(
-        CONF_DEVICE_NAME, DEVICE_TYPES.get(device_type, "IR Remote")
+        CONF_DEVICE_NAME, DEVICE_TYPES.get(device_type, "Remote Device")
     )
 
     attach_device_id = config_entry.data.get(CONF_ATTACH_TO_DEVICE)
@@ -135,17 +142,20 @@ async def async_setup_entry(
         device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
             name=device_name,
-            manufacturer="Infrared Remote",
+            manufacturer="Remote Devices",
             model=DEVICE_TYPES.get(device_type, device_type),
-            sw_version="0.7.0",
+            sw_version="0.8.0",
         )
+
+    protocol = DEVICE_PROTOCOLS.get(device_type, "ir")
+    button_cls = RFButton if protocol == "rf" else IRButton
 
     entities: list[ButtonEntity] = []
 
     if device_type == DEVICE_TYPE_NEC_TV:
         for cmd_name in LG_TV_COMMANDS:
             entities.append(
-                IRButton(
+                button_cls(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
@@ -156,7 +166,7 @@ async def async_setup_entry(
     elif device_type == DEVICE_TYPE_SAMSUNG_TV:
         for cmd_name in SAMSUNG_TV_COMMANDS:
             entities.append(
-                IRButton(
+                button_cls(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
@@ -167,7 +177,7 @@ async def async_setup_entry(
     elif device_type == DEVICE_TYPE_SHARP_TV:
         for cmd_name in SHARP_TV_COMMANDS:
             entities.append(
-                IRButton(
+                button_cls(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
@@ -178,7 +188,7 @@ async def async_setup_entry(
     elif device_type == DEVICE_TYPE_DENON_AVR:
         for cmd_name in DENON_AVR_COMMANDS:
             entities.append(
-                IRButton(
+                button_cls(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
@@ -189,7 +199,7 @@ async def async_setup_entry(
     elif device_type == DEVICE_TYPE_PHILIPS_LAMP:
         for cmd_name in PHILIPS_LAMP_COMMANDS:
             entities.append(
-                IRButton(
+                button_cls(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
@@ -200,7 +210,7 @@ async def async_setup_entry(
     elif device_type == DEVICE_TYPE_AMINO_STB:
         for cmd_name in AMINO_STB_BROADLINK_CODES:
             entities.append(
-                IRButton(
+                button_cls(
                     config_entry=config_entry,
                     emitter_entity_id=emitter_entity_id,
                     command_name=cmd_name,
@@ -210,7 +220,7 @@ async def async_setup_entry(
             )
     elif device_type == DEVICE_TYPE_RAW_TEST:
         entities.append(
-            IRButton(
+            button_cls(
                 config_entry=config_entry,
                 emitter_entity_id=emitter_entity_id,
                 command_name="test_signal",
@@ -218,12 +228,25 @@ async def async_setup_entry(
                 device_info=device_info,
             )
         )
+    elif device_type == DEVICE_TYPE_AIRWIT_FAN:
+        # Fan entity covers Fan1-6 + natural_wind + fan_off + direction.
+        # Light entity covers lamp toggle. Buttons just for the rest.
+        for cmd_name in ("brightness_up", "brightness_down", "all_off"):
+            entities.append(
+                button_cls(
+                    config_entry=config_entry,
+                    emitter_entity_id=emitter_entity_id,
+                    command_name=cmd_name,
+                    command_factory=lambda name=cmd_name: make_airwit_fan_command(name),
+                    device_info=device_info,
+                )
+            )
 
     async_add_entities(entities)
 
 
-class IRButton(ButtonEntity):
-    """A button that sends a single IR command when pressed."""
+class _RemoteButtonBase(ButtonEntity):
+    """Common base for IR and RF button entities."""
 
     _attr_has_entity_name = True
 
@@ -232,10 +255,10 @@ class IRButton(ButtonEntity):
         config_entry: ConfigEntry,
         emitter_entity_id: str,
         command_name: str,
-        command_factory: Any,
+        command_factory: Callable[[], Any],
         device_info: DeviceInfo,
     ) -> None:
-        """Initialize the IR button."""
+        """Initialize the remote button."""
         self._emitter_entity_id = emitter_entity_id
         self._command_name = command_name
         self._command_factory = command_factory
@@ -244,31 +267,54 @@ class IRButton(ButtonEntity):
         self._attr_icon = BUTTON_ICONS.get(command_name, "mdi:remote")
         self._attr_device_info = device_info
 
+    async def _send(self, command: Any) -> None:
+        """Send the command via the appropriate platform."""
+        raise NotImplementedError
+
     async def async_press(self) -> None:
-        """Send the IR command when the button is pressed."""
+        """Send the command when the button is pressed."""
         command = self._command_factory()
         if command is None:
-            _LOGGER.error("Failed to create IR command for '%s'", self._command_name)
+            _LOGGER.error("Failed to create command for '%s'", self._command_name)
             return
 
         _LOGGER.info(
-            "Sending IR command '%s' via emitter %s",
+            "Sending command '%s' via emitter %s",
             self._command_name,
             self._emitter_entity_id,
         )
 
         try:
-            await infrared.async_send_command(
-                self.hass,
-                self._emitter_entity_id,
-                command,
-                context=self._context,
-            )
+            await self._send(command)
         except HomeAssistantError as err:
             _LOGGER.error(
-                "Failed to send IR command '%s' via %s: %s",
+                "Failed to send command '%s' via %s: %s",
                 self._command_name,
                 self._emitter_entity_id,
                 err,
             )
             raise
+
+
+class IRButton(_RemoteButtonBase):
+    """Button that sends an IR command via the infrared platform."""
+
+    async def _send(self, command: Any) -> None:
+        await infrared.async_send_command(
+            self.hass,
+            self._emitter_entity_id,
+            command,
+            context=self._context,
+        )
+
+
+class RFButton(_RemoteButtonBase):
+    """Button that sends an RF command via the radio_frequency platform."""
+
+    async def _send(self, command: Any) -> None:
+        await radio_frequency.async_send_command(
+            self.hass,
+            self._emitter_entity_id,
+            command,
+            context=self._context,
+        )

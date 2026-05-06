@@ -1,5 +1,5 @@
 {
-  "name": "Infrared Remote",
+  "name": "Remote Devices",
   "render_readme": true,
-  "homeassistant": "2026.4.0"
+  "homeassistant": "2026.5.0"
 }
