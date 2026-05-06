@@ -5,6 +5,22 @@ All notable changes to the Remote Devices integration will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-05-06
+
+### Fixed
+- **Command classes now inherit from the official HA ABCs.** `NECCommand`, `SharpCommand`, `DenonCommand`, `RawBroadlinkCommand`, `RawTestCommand` all extend `homeassistant.components.infrared.InfraredCommand`. `RawBroadlinkRFCommand` extends `homeassistant.components.radio_frequency.RadioFrequencyCommand`. Previously they were duck-typed and only worked with our `broadlink_emitter`'s permissive entity — now they work with **any** compliant emitter, including the Broadlink integration in HA core 2026.5+ (`infrared.IR_emitter` / `radio_frequency.RF_emitter`) and ESPHome.
+- `get_raw_timings()` now returns the official flat `list[int]` of signed microseconds (positive = pulse, negative = space), matching `infrared_protocols.Command.get_raw_timings()`. Removed the local `Timing(high_us, low_us)` dataclass — there is no `Timing` type in HA's official API.
+
+### Changed
+- `broadlink_decode.decode_broadlink_b64_to_timings()` returns `list[int]` instead of `list[Timing]`.
+- Bumped DeviceInfo `sw_version` to 0.8.1.
+
+### Migration
+- No user action required. Existing IR devices configured against our `broadlink_emitter` still work (its converter now also accepts the new format). You can also now point them at the HA-core-provided `infrared.IR_emitter` / `radio_frequency.RF_emitter` entities and they'll work — no need for our `broadlink_emitter` for IR.
+
+### Requires
+- `broadlink_emitter` v0.4.1+ if you're using it (the matching converter update is shipped in that release).
+
 ## [0.8.0] - 2026-05-06
 
 ### Added

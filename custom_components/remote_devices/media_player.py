@@ -81,7 +81,7 @@ async def async_setup_entry(
         name=device_name,
         manufacturer="Remote Devices",
         model=DEVICE_TYPES.get(device_type, device_type),
-        sw_version="0.8.0",
+        sw_version="0.8.1",
     )
 
     # Denon AVR has discrete power on/off commands

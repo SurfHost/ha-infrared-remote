@@ -1,31 +1,27 @@
 """RF command factory for the Remote Devices integration.
 
-Provides RawBroadlinkRFCommand for devices we control via captured Broadlink RF
-packets (e.g. the Airwit Plafondventilator). Mirrors the IR-side
-`RawBroadlinkCommand` from nec.py but produces a `RadioFrequencyCommand`
-compatible object instead of an `InfraredCommand`.
+Provides `RawBroadlinkRFCommand` for devices we control via captured Broadlink
+RF packets (e.g. the Airwit Plafondventilator). Inherits from the official
+`RadioFrequencyCommand` ABC re-exported by `homeassistant.components.radio_frequency`,
+so any compliant emitter can dispatch the resulting commands.
 
 Pre-decoded once at import: looking up an Airwit command at button-press time
-returns the cached `RawBroadlinkRFCommand` instance.
+returns the cached instance.
 """
 
 from __future__ import annotations
 
-from homeassistant.components.radio_frequency import ModulationType
+from homeassistant.components.radio_frequency import (
+    ModulationType,
+    RadioFrequencyCommand,
+)
 
-from .broadlink_decode import Timing, decode_broadlink_b64_to_timings
+from .broadlink_decode import decode_broadlink_b64_to_timings
 from .const import AIRWIT_FAN_BROADLINK_RF_CODES, AIRWIT_FAN_FREQUENCY_HZ
 
 
-class RawBroadlinkRFCommand:
-    """RF command decoded from a Broadlink-learned base64 packet.
-
-    Implements the `RadioFrequencyCommand` interface:
-    - frequency: int (Hz)
-    - modulation: ModulationType
-    - repeat_count: int
-    - get_raw_timings() -> list[Timing]
-    """
+class RawBroadlinkRFCommand(RadioFrequencyCommand):
+    """RF command decoded from a Broadlink-learned base64 packet."""
 
     def __init__(
         self,
@@ -34,15 +30,17 @@ class RawBroadlinkRFCommand:
         repeat_count: int = 0,
     ) -> None:
         """Initialize from a Broadlink base64-encoded RF packet."""
-        self.frequency = frequency
-        self.modulation = ModulationType.OOK
-        self.repeat_count = repeat_count
+        super().__init__(
+            frequency=frequency,
+            modulation=ModulationType.OOK,
+            repeat_count=repeat_count,
+        )
         # RF signals contain long internal gaps (sync→data) that are NOT
         # repeat-frame boundaries. Decode the full packet without stripping.
         self._timings = decode_broadlink_b64_to_timings(b64_code, strip_repeats=False)
 
-    def get_raw_timings(self) -> list[Timing]:
-        """Return the decoded mark/space timings."""
+    def get_raw_timings(self) -> list[int]:
+        """Return the decoded signed-microsecond timings."""
         return self._timings
 
 
