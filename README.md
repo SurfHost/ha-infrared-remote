@@ -29,7 +29,7 @@ Set it up, pick your device type, pick the matching emitter (the integration fil
 | Philips RGBIC Lamp | IR — NEC (addr 0x00) | 11 buttons |
 | Amino Kamai 7X STB | IR — RC6 (raw learned) | 8 buttons |
 | Raw Test | IR — raw burst | 1 button |
-| **Airwit Plafondventilator** | **RF 433 MHz — raw learned** | **fan + light + 3 buttons** |
+| Airwit Plafondventilator | RF 433 MHz — raw learned | fan + light + 3 buttons |
 
 ## Requirements
 
